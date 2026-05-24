@@ -30,4 +30,7 @@ struct GamePlay
 	void drawAiBoard(AssetManager& assetManager);
 
 	void drawGrid(float boardX, float boardY);
+
+	bool checkHit(Board& board, Vector2 target);
+	Vector2 getSelectPosition(Board& board);
 };

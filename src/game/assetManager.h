@@ -7,5 +7,6 @@ struct AssetManager
 	Texture2D hit = {};
 	Texture2D ships = {};
 	Texture2D select = {};
+	Texture2D miss = {};
 	void loadAll();
 };

@@ -5,5 +5,5 @@ struct Human : Player
 {
 	Human();
 	void setBoard();
-	Board AiBoard;
+	Board aiBoard;
 };
