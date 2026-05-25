@@ -84,7 +84,7 @@ void Graphics::drawHumanBoard(AssetManager& assetManager, Board& humanBoard, std
 	}
 }
 
-void Graphics::drawAiBoard(AssetManager& assetManager, Board& aiBoard, Board::SquareState* humanShots)
+void Graphics::drawAiBoard(AssetManager& assetManager, Board& aiBoard, std::vector<Ship>& ships, Board::SquareState* humanShots)
 {
 	DrawTexturePro(
 		assetManager.board,
@@ -110,6 +110,35 @@ void Graphics::drawAiBoard(AssetManager& assetManager, Board& aiBoard, Board::Sq
 			dest,
 			{ 0,0 },
 			0.0f,
+			WHITE
+		);
+	}
+
+	for (auto& ship : ships)
+	{
+		if (ship.state != Ship::ShipState::SUNK)
+		{
+			continue;
+		}
+		Rectangle source = ship.getShipSource(true);
+		Rectangle dest;
+		dest.x = aiBoard.drawRec.x + 32 * ship.position.x;
+		dest.y = aiBoard.drawRec.y + 32 * ship.position.y;
+		dest.width = ship.size * 32;
+		dest.height = 32;
+		float rotation = 0.0f;
+		if (ship.alignment == Ship::Alignment::VERTICAL)
+		{
+			rotation = 90.0f;
+			dest.x += 32;
+		}
+
+		DrawTexturePro(
+			assetManager.ships,
+			source,
+			dest,
+			{ 0,0 },
+			rotation,
 			WHITE
 		);
 	}

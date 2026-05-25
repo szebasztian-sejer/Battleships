@@ -38,6 +38,7 @@ void Ship::checkAndSink(Board& board)
 		{
 			board.setSquare(square, Board::SquareState::SUNK);
 		}
+		state = ShipState::SUNK;
 	}
 }
 
@@ -66,33 +67,50 @@ Rectangle Ship::getShipSource(bool valid) const
 
 	switch (size)
 	{
-	case 2:
-	{
-		x = 0;
-		w = 64;
-		break;
-	}
-	case 3:
-	{
-		x = 64;
-		w = 96;
-		break;
-	}
-	case 4:
-	{
-		x = 160;
-		w = 128;
-		break;
-	}
-	case 5:
-	{
-		x = 288;
-		w = 160;
-		break;
-	}
+		case 2:
+		{
+			x = 0;
+			w = 64;
+			break;
+		}
+		case 3:
+		{
+			x = 64;
+			w = 96;
+			break;
+		}
+		case 4:
+		{
+			x = 160;
+			w = 128;
+			break;
+		}
+		case 5:
+		{
+			x = 288;
+			w = 160;
+			break;
+		}
 
 	}
-	y = valid ? 0 : 32;
+	if (!valid)
+	{
+		return { x,32,w,h };
+	}
+	switch (state)
+	{
+		case ShipState::FLOATING:
+		{
+			y = 0;
+			break;
+		}
+	
+		case ShipState::SUNK:
+		{
+			y = 64;
+			break;
+		}
+	}
 
 	return { x,y,w,h };
 }

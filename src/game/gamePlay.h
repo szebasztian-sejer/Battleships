@@ -29,5 +29,6 @@ struct GamePlay
 	bool update(AssetManager& assetManager);
 
 	bool checkHit(Board& board, Vector2 target);
+	void updateShips(Player* player);
 	Vector2 getSelectPosition(Board& board);
 };

@@ -19,9 +19,15 @@ struct Ship
 		HORIZONTAL = 0,
 		VERTICAL,
 	};
+	enum ShipState
+	{
+		FLOATING = 0,
+		SUNK,
+	};
 
 	Alignment alignment = Alignment::HORIZONTAL;
 	std::vector<Vector2> squares;
+	ShipState state;
 
 	Ship(Alignment alignment, int size, Vector2 position);
 	bool isSunk(Board& board) const;
@@ -29,6 +35,7 @@ struct Ship
 	bool isValid(Board& board) const;
 	Rectangle getShipSource(bool valid) const;
 	
+	void updateShip();
 
 	void printShip()
 	{

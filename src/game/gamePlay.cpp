@@ -14,13 +14,21 @@ bool GamePlay::init(Difficulty d)
 
 	return graphics.init();
 }
+
+void GamePlay::updateShips(Player* player)
+{
+	for (auto& ship : player->ships)
+	{
+		ship.checkAndSink(player->board);
+	}
+}
 bool GamePlay::update(AssetManager& assetManager)
 {
 	
-	graphics.update();
+	if (!graphics.update()) { return false; }
 
 	graphics.drawHumanBoard(assetManager, human.board, human.ships, ai.shots);
-	graphics.drawAiBoard(assetManager, ai.board, human.shots);
+	graphics.drawAiBoard(assetManager, ai.board, ai.ships, human.shots);
 
 	graphics.drawGrid(human.board.drawRec.x, human.board.drawRec.y);
 	graphics.drawGrid(ai.board.drawRec.x, ai.board.drawRec.y);
@@ -34,7 +42,7 @@ bool GamePlay::update(AssetManager& assetManager)
 		}
 		case State::HUMAN_TURN:
 		{
-			Vector2 mouseWorld = GetScreenToWorld2D(GetMousePosition(), graphics.camera);
+			Vector2 mouseWorld = graphics.getMouse();
 
 			if (CheckCollisionPointRec(mouseWorld, ai.board.drawRec))
 			{
@@ -57,6 +65,7 @@ bool GamePlay::update(AssetManager& assetManager)
 					{
 						ai.board.setSquare(selectedCell, Board::SquareState::HIT);	
 						human.shots[pos] = Board::SquareState::HIT;
+						updateShips(&ai);
 					}
 					else
 					{
@@ -84,9 +93,11 @@ bool GamePlay::update(AssetManager& assetManager)
 				human.board.setSquare(target, Board::SquareState::HIT);
 				ai.playerBoard.setSquare(target, Board::SquareState::HIT);
 				ai.shots[pos] = Board::SquareState::HIT;
+				updateShips(&human);
 			}
 			else
 			{
+				human.board.setSquare(target, Board::SquareState::MISSED);
 				ai.playerBoard.setSquare(target, Board::SquareState::MISSED);
 				ai.shots[pos] = Board::SquareState::MISSED;
 			}
@@ -125,7 +136,7 @@ Vector2 GamePlay::getSelectPosition(Board& board)
 {
 	constexpr int CELL_SIZE = 32;
 
-	Vector2 worldPos = GetScreenToWorld2D(GetMousePosition(), graphics.camera);
+	Vector2 worldPos = graphics.getMouse();
 
 	int cellX = (int)floor((worldPos.x - board.drawRec.x) / CELL_SIZE);
 	int cellY = (int)floor((worldPos.y - board.drawRec.y) / CELL_SIZE);
