@@ -6,6 +6,7 @@
 Human::Human()
 {
 	board.drawRec = { 100,100,320,320 };
+	std::fill(shots, shots + 100, Board::SquareState::EMPTY);
 }
 
 void Human::setBoard()

@@ -2,10 +2,17 @@
 #include <helpers.h>
 #include <ship.h>
 #include <raylib.h>
+#include <algorithm>
 
 AI::AI()
 {
 	board.drawRec = { 500,100,320,320 };
+	std::fill(shots, shots + 100, Board::SquareState::EMPTY);
+	remaining.resize(100);
+	for (int i = 0; i < remaining.size(); i++)
+	{
+		remaining[i] = i;
+	}
 }
 
 void AI::setBoard()
@@ -53,11 +60,15 @@ Vector2 AI::easyAiTarget()
 {
 	while(true)
 	{
-		float x = getRandomInt(0, playerBoard.w - 1);
-		float y = getRandomInt(0, playerBoard.h - 1);
+		int i = getRandomInt(0, remaining.size()-1);
+		int pos = remaining[i];
+		float x = pos % playerBoard.w;
+		float y = pos / playerBoard.w;
 		Vector2 target = { x,y };
 		if (playerBoard.getSquare(target) == Board::SquareState::EMPTY)
 		{
+			remaining[i] = remaining.back();
+			remaining.pop_back();
 			return target;
 		}
 	}

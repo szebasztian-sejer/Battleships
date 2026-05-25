@@ -2,6 +2,7 @@
 #include <vector>
 #include <board.h>
 #include <raylib.h>
+#include <algorithm>
 
 struct Ship;
 
@@ -10,8 +11,7 @@ struct Player
 	Player();
 	Board board;
 	std::vector<Ship> ships;
-	std::vector<Vector2> hits;
-	std::vector<Vector2> misses;
+	Board::SquareState shots[100];
 	bool isLost();
 
 	virtual void setBoard() = 0;

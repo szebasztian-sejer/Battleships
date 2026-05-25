@@ -3,6 +3,7 @@
 #include <raylib.h>
 #include <ai.h>
 #include <difficulty.h>
+#include <graphics.h>
 
 struct AssetManager;
 
@@ -21,15 +22,11 @@ struct GamePlay
 	Difficulty difficulty;
 	Human human;
 	AI ai;
-	Camera2D camera = {};
+
+	Graphics graphics;
 
 	bool init(Difficulty d);
 	bool update(AssetManager& assetManager);
-
-	void drawHumanBoard(AssetManager& assetManager);
-	void drawAiBoard(AssetManager& assetManager);
-
-	void drawGrid(float boardX, float boardY);
 
 	bool checkHit(Board& board, Vector2 target);
 	Vector2 getSelectPosition(Board& board);
