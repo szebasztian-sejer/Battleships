@@ -4,6 +4,8 @@
 #include <ai.h>
 #include <difficulty.h>
 #include <graphics.h>
+#include <shipMask.h>
+#include <memory>
 
 struct AssetManager;
 
@@ -22,6 +24,9 @@ struct GamePlay
 	Difficulty difficulty;
 	Human human;
 	AI ai;
+
+	int selectedShip;
+	std::unique_ptr<ShipMask> shipMask;
 
 	Graphics graphics;
 

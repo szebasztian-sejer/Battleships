@@ -2,11 +2,13 @@
 #include <ui.h>
 #include <ship.h>
 #include <assetManager.h>
+#include <iostream>
+
 
 
 bool GamePlay::init(Difficulty d)
 {
-	human.setBoard();
+	//human.setBoard();
 	ai.setBoard();
 	
 	difficulty = d;
@@ -32,17 +34,70 @@ bool GamePlay::update(AssetManager& assetManager)
 
 	graphics.drawGrid(human.board.drawRec.x, human.board.drawRec.y);
 	graphics.drawGrid(ai.board.drawRec.x, ai.board.drawRec.y);
+	graphics.drawBottomRec();
+	
+
+	Vector2 mouseWorld = graphics.getMouse();
+
 
 	switch (state)
 		{
 		case State::PLACEMENT:
 		{
-			state = State::HUMAN_TURN;
+			if (graphics.shipPlaces.empty()) { state = State::HUMAN_TURN; }
+			for (int i = 0; i < graphics.shipPlaces.size(); i++)
+			{
+				auto& shipPlace = graphics.shipPlaces[i];
+				shipPlace.isHovered = CheckCollisionPointRec(mouseWorld, shipPlace.dstRec);
+				if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && shipPlace.isHovered && shipPlace.active)
+				{
+					shipPlace.active = false;
+					selectedShip = i;
+					shipMask = std::make_unique<ShipMask>(
+						Ship::HORIZONTAL,
+						graphics.shipPlaces[i].size,
+						getSelectPosition(human.board)
+						);
+				}
+				
+			}
+			if (shipMask)
+			{
+				shipMask->position = getSelectPosition(human.board);
+				shipMask->updateSquares();
+				if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+				{
+					if (shipMask->isValid(human.board))
+					{
+						Ship s(shipMask->alignment, shipMask->size, shipMask->position);
+						human.ships.push_back(s);
+						for (auto& pos : s.squares)
+						{
+							human.board.setSquare(pos, Board::SquareState::SHIP);
+						}
+						graphics.shipPlaces[selectedShip] = graphics.shipPlaces.back();
+						graphics.shipPlaces.pop_back();
+						shipMask = nullptr;
+					}
+				}
+				if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
+				{
+					shipMask->alignment = shipMask->alignment == Ship::HORIZONTAL ? Ship::VERTICAL : Ship::HORIZONTAL;
+					shipMask->updateSquares();
+				}
+				if (IsKeyPressed(KEY_BACKSPACE))
+				{
+					graphics.shipPlaces[selectedShip].active = true;
+					shipMask = nullptr;
+				}
+			}
+
+			graphics.drawPlacementsUi(assetManager, shipMask.get(), human.board);
 			break;
 		}
 		case State::HUMAN_TURN:
 		{
-			Vector2 mouseWorld = graphics.getMouse();
+			
 
 			if (CheckCollisionPointRec(mouseWorld, ai.board.drawRec))
 			{

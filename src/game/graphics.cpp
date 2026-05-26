@@ -1,12 +1,37 @@
 #include <graphics.h>
 #include <assetManager.h>
 #include <ship.h>
+#include <shipPlace.h>
 
 bool Graphics::init()
 {
 	camera.target = { (float)GetScreenWidth() / 2.0f, (float)GetScreenHeight() / 2.0f };  // world-space center of view
 	camera.rotation = 0.0f;
 	camera.zoom = 1.0f;
+	int ships[] = { 5,4,3,3,2 };
+	bottomRec = { 16,(float)GetScreenHeight() - 224, (float)GetScreenWidth() - 32, 210 };
+	float xOffSet = 32.0f;
+	int off = xOffSet;
+
+	for (int i = 0; i < 5; i++)
+	{
+		ShipPlace s(ships[i], true);
+		if (i != 0)
+		{
+			off += (ships[i - 1] + 1) * xOffSet;
+		}
+		s.dstRec.x = bottomRec.x + off;
+		s.dstRec.y = bottomRec.y + 64;
+		s.dstRec.width = ships[i] * 32;
+		s.dstRec.height = 32;
+		shipPlaces.push_back(s);
+		s.active = false;
+		remainingHumanShips.push_back(s);
+		remainingAiShips.push_back(s);
+
+	}
+	quitButton = { bottomRec.x + bottomRec.width - 100, bottomRec.y+bottomRec.height - 64, 80, 50 };
+	currentTarget = { bottomRec.x + bottomRec.width - 200, bottomRec.y + 20, 64, 50 };
 	return true;
 }
 
@@ -42,7 +67,7 @@ void Graphics::drawHumanBoard(AssetManager& assetManager, Board& humanBoard, std
 
 	for (auto& ship : ships)
 	{
-		Rectangle source = ship.getShipSource(true);
+		Rectangle source = ship.getShipSource();
 		Rectangle dest;
 		dest.x = humanBoard.drawRec.x + 32 * ship.position.x;
 		dest.y = humanBoard.drawRec.y + 32 * ship.position.y;
@@ -120,7 +145,7 @@ void Graphics::drawAiBoard(AssetManager& assetManager, Board& aiBoard, std::vect
 		{
 			continue;
 		}
-		Rectangle source = ship.getShipSource(true);
+		Rectangle source = ship.getShipSource();
 		Rectangle dest;
 		dest.x = aiBoard.drawRec.x + 32 * ship.position.x;
 		dest.y = aiBoard.drawRec.y + 32 * ship.position.y;
@@ -165,4 +190,67 @@ void Graphics::drawGrid(float boardX, float boardY)
 		);
 	}
 }
+
+void Graphics::drawBottomRec()
+{
+	Color c = { 155,155,155, 255 };
+
+	DrawRectangle(bottomRec.x, bottomRec.y, bottomRec.width, bottomRec.height, c);
+
+}
+void Graphics::drawPlacementsUi(AssetManager& assetManager, ShipMask* shipMask, Board& board)
+{
+	
+	for (int i = 0; i < shipPlaces.size(); i++)
+	{
+		const auto& s = shipPlaces[i];
+		DrawTexturePro(
+			assetManager.ships,
+			s.srcRec,
+			s.dstRec,
+			{ 0,0 },
+			0.0f,
+			WHITE
+		);
+
+		if (s.isHovered)
+		{
+			DrawRectangle(s.dstRec.x - 4, s.dstRec.y - 4, 4, s.dstRec.height + 8, BLACK);
+			DrawRectangle(s.dstRec.x, s.dstRec.y - 4, s.dstRec.width, 4, BLACK);
+			DrawRectangle(s.dstRec.x + s.dstRec.width, s.dstRec.y - 4, 4, s.dstRec.height + 8, BLACK);
+			DrawRectangle(s.dstRec.x - 4, s.dstRec.y + s.dstRec.height, s.dstRec.width + 8, 4, BLACK);
+		}
+	}
+	if (shipMask)
+	{
+		Rectangle source = shipMask->getShipMaskSource(shipMask->isValid(board));
+		Rectangle dest;
+		dest.x = getMouse().x;
+		dest.y = getMouse().y;
+		dest.width = shipMask->size * 32;
+		dest.height = 32;
+		float rotation = 0.0f;
+		if (shipMask->alignment == Ship::Alignment::VERTICAL)
+		{
+			rotation = 90.0f;
+			dest.x += 32;
+		}
+
+		DrawTexturePro(
+			assetManager.ships,
+			source,
+			dest,
+			{ 0,0 },
+			rotation,
+			WHITE
+		);
+
+	}
+	else
+	{
+		//std::cout << "ShipMask destroyed\n";
+	}
+}
+void drawGameUI()
+{}
 

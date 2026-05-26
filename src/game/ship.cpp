@@ -19,6 +19,22 @@ Ship::Ship(Alignment alignment, int size, Vector2 position)
 	}
 
 }
+bool Ship::isValid(Board& board) const
+{
+	for (auto& pos : squares)
+	{
+		if (pos.x < 0 || pos.x >= board.w || pos.y < 0 || pos.y >= board.h)
+		{
+			return false;
+		}
+		if (board.getSquare(pos) != Board::SquareState::EMPTY)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
 bool Ship::isSunk(Board& board) const
 {
 	for (auto& square : squares)
@@ -42,23 +58,9 @@ void Ship::checkAndSink(Board& board)
 	}
 }
 
-bool Ship::isValid(Board& board) const
-{
-	for(auto& pos : squares)
-	{ 
-		if (pos.x < 0 || pos.x >= board.w || pos.y < 0 || pos.y >= board.h)
-		{
-			return false;
-		}
-		if (board.getSquare(pos) != Board::SquareState::EMPTY)
-		{
-			return false;
-		}
-	}
-	return true;
-}
 
-Rectangle Ship::getShipSource(bool valid) const
+
+Rectangle Ship::getShipSource() const
 {
 	float x = 0;
 	float y = 0;
@@ -93,10 +95,6 @@ Rectangle Ship::getShipSource(bool valid) const
 		}
 
 	}
-	if (!valid)
-	{
-		return { x,32,w,h };
-	}
 	switch (state)
 	{
 		case ShipState::FLOATING:
@@ -114,3 +112,4 @@ Rectangle Ship::getShipSource(bool valid) const
 
 	return { x,y,w,h };
 }
+

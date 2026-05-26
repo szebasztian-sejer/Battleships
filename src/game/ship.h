@@ -31,11 +31,9 @@ struct Ship
 
 	Ship(Alignment alignment, int size, Vector2 position);
 	bool isSunk(Board& board) const;
-	void checkAndSink(Board& board);
 	bool isValid(Board& board) const;
-	Rectangle getShipSource(bool valid) const;
-	
-	void updateShip();
+	Rectangle Ship::getShipSource() const;
+	void checkAndSink(Board& board);
 
 	void printShip()
 	{
