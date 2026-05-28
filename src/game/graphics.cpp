@@ -37,6 +37,7 @@ bool Graphics::init()
 
 Vector2 Graphics::getMouse()
 {
+	
 	return GetScreenToWorld2D(GetMousePosition(), camera);
 }
 
@@ -89,23 +90,30 @@ void Graphics::drawHumanBoard(AssetManager& assetManager, Board& humanBoard, std
 			WHITE
 		);
 	}
-	for (int i = 0; i < humanBoard.w * humanBoard.h; i++)
+	for (int y = 0; y < humanBoard.h; y++)
 	{
-		if (aiShots[i] == Board::SquareState::EMPTY) { continue; }
-		Rectangle dest;
-		dest.x = humanBoard.drawRec.x + 32 * (i % humanBoard.w);
-		dest.y = humanBoard.drawRec.y + 32 * (i / humanBoard.w);
-		dest.width = 32;
-		dest.height = 32;
-		Texture2D tex = aiShots[i] == Board::SquareState::HIT ? assetManager.hit : assetManager.miss;
-		DrawTexturePro(
-			tex,
-			{ 0,0,32,32 },
-			dest,
-			{ 0,0 },
-			0.0f,
-			WHITE
-		);
+		for (int x = 0; x < humanBoard.w; x++)
+		{
+			const auto& sq = humanBoard.getSquare(Vector2{ (float)x,(float)y });
+			if ( sq != Board::SquareState::HIT && sq != Board::SquareState::MISSED) 
+			{
+				continue;
+			}
+			Rectangle dest;
+			dest.x = humanBoard.drawRec.x + 32 * x;
+			dest.y = humanBoard.drawRec.y + 32 * y;
+			dest.width = 32;
+			dest.height = 32;
+			Texture2D tex = sq == Board::SquareState::HIT ? assetManager.hit : assetManager.miss;
+			DrawTexturePro(
+				tex,
+				{ 0,0,32,32 },
+				dest,
+				{ 0,0 },
+				0.0f,
+				WHITE
+			);
+		}
 	}
 }
 

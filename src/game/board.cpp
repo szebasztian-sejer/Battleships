@@ -8,10 +8,10 @@ Board::Board()
 
 void Board::setSquare(Vector2 position, SquareState state)
 {
-	squares[position.x][position.y] = state;
+	squares[position.y][position.x] = state;
 	std::cout << "Successfully set square at x: " << position.x << " y: " << position.y << "\n";
 }
 Board::SquareState Board::getSquare(Vector2 position)
 {
-	return squares[position.x][position.y];
+	return squares[position.y][position.x];
 }

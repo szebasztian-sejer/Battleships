@@ -19,7 +19,7 @@ bool ShipMask::isValid(Board& board) const
 		{
 			return false;
 		}
-		if (board.getSquare(pos) != Board::SquareState::EMPTY)
+		if (board.getSquare(pos) != Board::SquareState::EMPTY && board.getSquare(pos) != Board::SquareState::HIT)
 		{
 			return false;
 		}

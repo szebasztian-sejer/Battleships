@@ -6,6 +6,8 @@
 #include <graphics.h>
 #include <shipMask.h>
 #include <memory>
+#include <unordered_set>
+#include <ship.h>
 
 struct AssetManager;
 
@@ -26,6 +28,7 @@ struct GamePlay
 	AI ai;
 
 	int selectedShip;
+	std::unordered_set<Ship> alreadySunk;
 	std::unique_ptr<ShipMask> shipMask;
 
 	Graphics graphics;
@@ -34,6 +37,6 @@ struct GamePlay
 	bool update(AssetManager& assetManager);
 
 	bool checkHit(Board& board, Vector2 target);
-	void updateShips(Player* player);
+	bool updateShips(Player* player, Board* oppBoard = nullptr);
 	Vector2 getSelectPosition(Board& board);
 };

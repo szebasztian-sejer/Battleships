@@ -1,9 +1,11 @@
 #include <ship.h>
 #include <board.h>
+#include <iostream>
 
 Ship::Ship(Alignment alignment, int size, Vector2 position)
 {
 	id = shipID;
+	std::cout << "New ship created with ID: " << id << "\n";
 	shipID++;
 	this->alignment = alignment;
 	this->size = size;
@@ -46,16 +48,22 @@ bool Ship::isSunk(Board& board) const
 	}
 	return true;
 }
-void Ship::checkAndSink(Board& board)
+bool Ship::checkAndSink(Board& board, Board* oppBoard)
 {
 	if (isSunk(board))
 	{
 		for (auto& square : squares)
 		{
 			board.setSquare(square, Board::SquareState::SUNK);
+			if (oppBoard)
+			{
+				oppBoard->setSquare(square, Board::SquareState::SUNK);
+			}
 		}
 		state = ShipState::SUNK;
+		return true;
 	}
+	return false;
 }
 
 

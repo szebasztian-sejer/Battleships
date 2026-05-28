@@ -4,8 +4,6 @@
 #include <assetManager.h>
 #include <iostream>
 
-
-
 bool GamePlay::init(Difficulty d)
 {
 	//human.setBoard();
@@ -17,16 +15,22 @@ bool GamePlay::init(Difficulty d)
 	return graphics.init();
 }
 
-void GamePlay::updateShips(Player* player)
+bool GamePlay::updateShips(Player* player, Board* oppBoard)
 {
+	bool result = false;
 	for (auto& ship : player->ships)
 	{
-		ship.checkAndSink(player->board);
+		if (ship.checkAndSink(player->board, oppBoard))
+		{
+			bool newSink = alreadySunk.insert(ship).second;
+			if (newSink) { result = true; }
+		}
 	}
+	return result;
 }
 bool GamePlay::update(AssetManager& assetManager)
 {
-	
+
 	if (!graphics.update()) { return false; }
 
 	graphics.drawHumanBoard(assetManager, human.board, human.ships, ai.shots);
@@ -35,13 +39,13 @@ bool GamePlay::update(AssetManager& assetManager)
 	graphics.drawGrid(human.board.drawRec.x, human.board.drawRec.y);
 	graphics.drawGrid(ai.board.drawRec.x, ai.board.drawRec.y);
 	graphics.drawBottomRec();
-	
+
 
 	Vector2 mouseWorld = graphics.getMouse();
 
 
 	switch (state)
-		{
+	{
 		case State::PLACEMENT:
 		{
 			if (graphics.shipPlaces.empty()) { state = State::HUMAN_TURN; }
@@ -59,7 +63,7 @@ bool GamePlay::update(AssetManager& assetManager)
 						getSelectPosition(human.board)
 						);
 				}
-				
+
 			}
 			if (shipMask)
 			{
@@ -97,7 +101,6 @@ bool GamePlay::update(AssetManager& assetManager)
 		}
 		case State::HUMAN_TURN:
 		{
-			
 
 			if (CheckCollisionPointRec(mouseWorld, ai.board.drawRec))
 			{
@@ -116,24 +119,27 @@ bool GamePlay::update(AssetManager& assetManager)
 				if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
 				{
 					int pos = (int)selectedCell.y * ai.board.w + (int)selectedCell.x;
-					if (checkHit(ai.board, selectedCell))
+					if (human.shots[pos] == Board::SquareState::EMPTY)
 					{
-						ai.board.setSquare(selectedCell, Board::SquareState::HIT);	
-						human.shots[pos] = Board::SquareState::HIT;
-						updateShips(&ai);
-					}
-					else
-					{
-						ai.board.setSquare(selectedCell, Board::SquareState::MISSED);
-						human.shots[pos] = Board::SquareState::MISSED;
-					}
-					if (ai.isLost())
-					{
-						state = State::HUMAN_WIN;
-					}
-					else
-					{
-						state = State::AI_TURN;
+						if (checkHit(ai.board, selectedCell))
+						{
+							ai.board.setSquare(selectedCell, Board::SquareState::HIT);
+							human.shots[pos] = Board::SquareState::HIT;
+							updateShips(&ai);
+						}
+						else
+						{
+							ai.board.setSquare(selectedCell, Board::SquareState::MISSED);
+							human.shots[pos] = Board::SquareState::MISSED;
+						}
+						if (ai.isLost())
+						{
+							state = State::HUMAN_WIN;
+						}
+						else
+						{
+							state = State::AI_TURN;
+						}
 					}
 				}
 			}
@@ -141,14 +147,52 @@ bool GamePlay::update(AssetManager& assetManager)
 		}
 		case State::AI_TURN:
 		{
-			Vector2 target = ai.easyAiTarget();
+			Vector2 target = ai.mediumAiTarget();
+			std::cout << "Targetting: {" << target.y << "," << target.x << "}\n";
 			int pos = (int)target.y * human.board.w + (int)target.x;
 			if (checkHit(human.board, target))
 			{
 				human.board.setSquare(target, Board::SquareState::HIT);
 				ai.playerBoard.setSquare(target, Board::SquareState::HIT);
 				ai.shots[pos] = Board::SquareState::HIT;
-				updateShips(&human);
+				if (updateShips(&human, &(ai.playerBoard)))
+				{
+					ai.currentTargets.clear();
+					
+					int cruisersSunk = 0;
+					for (const auto& s : human.ships)
+					{
+						if (s.isSunk(human.board) && s.size == 3)
+						{
+							cruisersSunk++;
+						}
+					}
+					if (cruisersSunk == 1)
+					{
+						ai.remainingShips = { 5,4,3,2 };
+					}
+					else if (cruisersSunk == 2)
+					{
+						ai.remainingShips = { 5,4,2 };
+					}
+					
+
+					for (const auto& s : human.ships)
+					{
+						if (s.isSunk(human.board) && s.size != 3 ) 
+						{
+							for (int i = 0; i < ai.remainingShips.size(); i++)
+							{
+								if (ai.remainingShips[i] == s.size)
+								{
+									ai.remainingShips[i] = ai.remainingShips.back();
+									ai.remainingShips.pop_back();
+								}
+							}
+						}
+					}
+
+				}
 			}
 			else
 			{

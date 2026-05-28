@@ -15,15 +15,14 @@ int main(void)
 		return 0;
 	}
 
-	while (!WindowShouldClose())
+	bool running = true;
+
+	while (running && !WindowShouldClose())
 	{
 		BeginDrawing();
 		ClearBackground(RAYWHITE);
 
-		if (!updateGame())
-		{
-			CloseWindow();
-		}
+		running = updateGame();
 
 		EndDrawing();
 	}

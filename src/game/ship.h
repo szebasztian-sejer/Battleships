@@ -33,7 +33,7 @@ struct Ship
 	bool isSunk(Board& board) const;
 	bool isValid(Board& board) const;
 	Rectangle Ship::getShipSource() const;
-	void checkAndSink(Board& board);
+	bool checkAndSink(Board& board, Board* oppBoard = nullptr);
 
 	void printShip()
 	{
@@ -42,5 +42,19 @@ struct Ship
 			std::cout << "{" << s.x << "," << s.y << "," << size << "},";
 		}
 		std::cout << "\n";
+	}
+
+	bool operator==(const Ship& other) const
+	{
+		return id == other.id;
+	}
+};
+
+template<>
+struct std::hash<Ship>
+{
+	std::size_t operator()(const Ship& s) const noexcept
+	{
+		return std::hash<int>{}(s.id);
 	}
 };

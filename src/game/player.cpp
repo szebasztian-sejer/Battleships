@@ -8,11 +8,11 @@ Player::Player()
 
 bool Player::isLost()
 {
-	for (int i = 0; i < board.h; i++)
+	for (int y = 0; y < board.h; y++)
 	{
-		for (int j = 0; j < board.w; j++)
+		for (int x = 0; x < board.w; x++)
 		{
-			if (board.getSquare(Vector2{ (float)i,(float)j }) == Board::SquareState::SHIP)
+			if (board.getSquare(Vector2{ (float)x,(float)y }) == Board::SquareState::SHIP)
 			{
 				return false;
 			}

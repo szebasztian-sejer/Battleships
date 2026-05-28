@@ -22,6 +22,5 @@ struct ShipMask
 	Rectangle getShipMaskSource(bool valid = true) const;
 	~ShipMask()
 	{
-		std::cout << "Mask destroyed\n";
 	}
 };
