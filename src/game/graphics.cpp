@@ -2,6 +2,7 @@
 #include <assetManager.h>
 #include <ship.h>
 #include <shipPlace.h>
+#include <string>
 
 bool Graphics::init()
 {
@@ -26,12 +27,10 @@ bool Graphics::init()
 		s.dstRec.height = 32;
 		shipPlaces.push_back(s);
 		s.active = false;
-		remainingHumanShips.push_back(s);
-		remainingAiShips.push_back(s);
+		aiShips.push_back(s);
 
 	}
 	quitButton = { bottomRec.x + bottomRec.width - 100, bottomRec.y+bottomRec.height - 64, 80, 50 };
-	currentTarget = { bottomRec.x + bottomRec.width - 200, bottomRec.y + 20, 64, 50 };
 	return true;
 }
 
@@ -201,9 +200,14 @@ void Graphics::drawGrid(float boardX, float boardY)
 
 void Graphics::drawBottomRec()
 {
-	Color c = { 155,155,155, 255 };
+	Color c = { 10,10,10, 255 };
 
 	DrawRectangle(bottomRec.x, bottomRec.y, bottomRec.width, bottomRec.height, c);
+
+	DrawLineEx({ bottomRec.x + 5, bottomRec.y + 10 }, { bottomRec.x + bottomRec.width - 5, bottomRec.y + 10 }, 10, WHITE);
+	DrawLineEx({ bottomRec.x + 5, bottomRec.y + 10 }, { bottomRec.x + 5, bottomRec.y + bottomRec.height - 10 }, 10, WHITE);
+	DrawLineEx({ bottomRec.x + 5, bottomRec.y + bottomRec.height - 10 }, { bottomRec.x + bottomRec.width - 5, bottomRec.y + bottomRec.height - 10 }, 10, WHITE);
+	DrawLineEx({ bottomRec.x + bottomRec.width - 5, bottomRec.y + 10 }, { bottomRec.x + bottomRec.width - 5, bottomRec.y + bottomRec.height - 10 }, 10, WHITE);
 
 }
 void Graphics::drawPlacementsUi(AssetManager& assetManager, ShipMask* shipMask, Board& board)
@@ -223,10 +227,10 @@ void Graphics::drawPlacementsUi(AssetManager& assetManager, ShipMask* shipMask, 
 
 		if (s.isHovered)
 		{
-			DrawRectangle(s.dstRec.x - 4, s.dstRec.y - 4, 4, s.dstRec.height + 8, BLACK);
-			DrawRectangle(s.dstRec.x, s.dstRec.y - 4, s.dstRec.width, 4, BLACK);
-			DrawRectangle(s.dstRec.x + s.dstRec.width, s.dstRec.y - 4, 4, s.dstRec.height + 8, BLACK);
-			DrawRectangle(s.dstRec.x - 4, s.dstRec.y + s.dstRec.height, s.dstRec.width + 8, 4, BLACK);
+			DrawRectangle(s.dstRec.x - 4, s.dstRec.y - 4, 4, s.dstRec.height + 8, RED);
+			DrawRectangle(s.dstRec.x, s.dstRec.y - 4, s.dstRec.width, 4, RED);
+			DrawRectangle(s.dstRec.x + s.dstRec.width, s.dstRec.y - 4, 4, s.dstRec.height + 8, RED);
+			DrawRectangle(s.dstRec.x - 4, s.dstRec.y + s.dstRec.height, s.dstRec.width + 8, 4, RED);
 		}
 	}
 	if (shipMask)
@@ -259,6 +263,68 @@ void Graphics::drawPlacementsUi(AssetManager& assetManager, ShipMask* shipMask, 
 		//std::cout << "ShipMask destroyed\n";
 	}
 }
-void drawGameUI()
-{}
+
+void Graphics::drawCurrentTargetText(Vector2 position)
+{
+	std::string target = "Now targetting: ";
+	if (position.x < 0 || position.x >= 10 || position.y < 0 || position.y >= 10)
+	{
+		target += "NONE";
+	}
+	else
+	{
+		target += 'A' + position.x;
+		target += std::to_string((int)position.y + 1);
+	}
+	int x = (bottomRec.x + bottomRec.width) / 30 * 17;
+	int y = bottomRec.y + 22;
+
+	DrawText(target.c_str(), x, y, 32, WHITE);
+
+
+}
+
+void Graphics::drawGameUI(AssetManager& assetManager, Vector2 position, const std::vector<Ship>& remainingAiShips)
+{
+	int x = bottomRec.x + 20;
+	int y = bottomRec.y + 20;
+	DrawText("Remaining targets: ", x, y, 32, WHITE);
+	for (int i = 0; i < remainingAiShips.size(); i++)
+	{
+		if (remainingAiShips[i].state != Ship::SUNK)
+		{
+			auto toDraw = aiShips[i];
+			DrawTexturePro(
+				assetManager.ships,
+				toDraw.srcRec,
+				toDraw.dstRec,
+				{ 0.0f, 0.0f },
+				0.0f,
+				WHITE
+			);
+		}
+	}
+
+	drawCurrentTargetText(position);
+}
+
+bool Graphics::drawQuitButton(Vector2 mouse)
+{
+	Color c{ 132, 132, 132, 255 };
+	DrawRectangle(quitButton.x, quitButton.y, quitButton.width, quitButton.height, c);
+	DrawText("Quit", quitButton.x + 5, quitButton.y + 5, 32, WHITE);
+
+	if (CheckCollisionPointRec(mouse, quitButton))
+	{
+		DrawRectangle(quitButton.x - 4, quitButton.y - 4, 4, quitButton.height + 8, RED);
+		DrawRectangle(quitButton.x, quitButton.y - 4, quitButton.width, 4, RED);
+		DrawRectangle(quitButton.x + quitButton.width, quitButton.y - 4, 4, quitButton.height + 8, RED);
+		DrawRectangle(quitButton.x - 4, quitButton.y + quitButton.height, quitButton.width + 8, 4, RED);
+		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+		{
+			return true;
+		}
+	}
+	return false;
+}
 

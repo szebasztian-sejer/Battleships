@@ -7,4 +7,5 @@ void AssetManager::loadAll()
 	ships = LoadTexture(RESOURCES_PATH "ships.png");
 	select = LoadTexture(RESOURCES_PATH "select.png");
 	miss = LoadTexture(RESOURCES_PATH "miss.png");
+	cursor = LoadTexture(RESOURCES_PATH "cursor.png");
 }

@@ -39,10 +39,12 @@ bool GamePlay::update(AssetManager& assetManager)
 	graphics.drawGrid(human.board.drawRec.x, human.board.drawRec.y);
 	graphics.drawGrid(ai.board.drawRec.x, ai.board.drawRec.y);
 	graphics.drawBottomRec();
+	
 
 
 	Vector2 mouseWorld = graphics.getMouse();
-
+	if (graphics.drawQuitButton(mouseWorld)) { return false; }
+	auto targetPos = getSelectPosition(ai.board);
 
 	switch (state)
 	{
@@ -143,6 +145,8 @@ bool GamePlay::update(AssetManager& assetManager)
 					}
 				}
 			}
+
+			graphics.drawGameUI(assetManager, targetPos, ai.ships);
 			break;
 		}
 		case State::AI_TURN:

@@ -15,10 +15,8 @@ struct Graphics
 
 	Rectangle bottomRec = {};
 	std::vector<ShipPlace> shipPlaces;
-	std::vector<ShipPlace> remainingHumanShips;
-	std::vector<ShipPlace> remainingAiShips;
+	std::vector<ShipPlace> aiShips;
 	Rectangle quitButton = {};
-	Rectangle currentTarget = {};
 
 	void drawHumanBoard(AssetManager& assetManager, Board& humanBoard, std::vector<Ship>& ships, Board::SquareState* aiShots);
 	void drawAiBoard(AssetManager& assetManager, Board& aiBoard, std::vector<Ship>& ships, Board::SquareState* humanShots);
@@ -27,7 +25,10 @@ struct Graphics
 
 	void drawBottomRec();
 	void drawPlacementsUi(AssetManager& assetManager, ShipMask* shipMask, Board& board);
-	void drawGameUI();
+	void drawCurrentTargetText(Vector2 position);
+
+	void drawGameUI(AssetManager& assetManager, Vector2 position, const std::vector<Ship>& remainingAiShips);
+	bool drawQuitButton(Vector2 mouse);
 
 	bool init();
 

@@ -13,21 +13,24 @@ if(MSVC)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Release>:Release>")
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 add_compile_options(/arch:AVX2) #make sure SIMD optimizations take place
-else()
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64|i.86")
 	add_compile_options(-mavx2 -mfma) # make sure SIMD optimizations take place, but on linux and other platforms
 endif()
 
 
-# Ensure raylib is built as static libraries
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build Raylib as static libraries" FORCE)
+
 
 
 project(battleships)
 
+if(ANDROID)
+	find_package(raylib REQUIRED)
+else()
+	# Ensure raylib is built as static libraries
+	set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build Raylib as static libraries" FORCE)
 #add raylib, and here you would add other libraries if needed!
-add_subdirectory(thirdparty/raylib-5.0)
-add_subdirectory(thirdparty/imgui-docking)
-add_subdirectory(thirdparty/rlImgui)
+	add_subdirectory(thirdparty/raylib-5.0)
+endif()
 
 
 # MY_SOURCES is defined to be a list of all the source files for my game 
@@ -87,9 +90,12 @@ target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURC
 target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/game")
 
 
-
+if(ANDROID)
+	target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE raylib)
+else()
 # Link raylib library statically, Here wou would add other libraries!
-target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE raylib_static imgui rlimgui)
+target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE raylib_static)
+endif()
 
 
 

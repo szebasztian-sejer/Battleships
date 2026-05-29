@@ -24,35 +24,25 @@ void AI::setBoard()
 		bool placed = false;
 		do
 		{
-			placed = true;
+			placed = false;
 			int x = getRandomInt(0, board.w - 1);
 			int y = getRandomInt(0, board.h - 1);
 			Vector2 position = { (float)x, (float)y };
 			int a = getRandomInt(0, 1);
 			Ship::Alignment alignment = a == 0 ? Ship::Alignment::HORIZONTAL : Ship::Alignment::VERTICAL;
 
-			Ship ship(alignment, i, position);
-			for (auto& pos : ship.squares)
+			ShipMask shipMask(alignment, i, position);
+			if(shipMask.isValid(board))
 			{
-				if (!ship.isValid(board))
-				{
-					placed = false;
-					break;
-				}
-
-			}
-			if (placed)
-			{
+				placed = true;
+				Ship ship(shipMask.alignment, shipMask.size, shipMask.position);
 				ships.push_back(ship);
 				for (auto& pos : ship.squares)
 				{
 					board.setSquare(pos, Board::SquareState::SHIP);
 				}
 			}
-			else
-			{
-				shipID--;
-			}
+			
 		} while (!placed);
 	}
 }

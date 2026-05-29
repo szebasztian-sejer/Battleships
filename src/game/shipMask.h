@@ -9,7 +9,7 @@ struct Board;
 
 struct ShipMask
 {
-	ShipMask::ShipMask(Ship::Alignment alignment, int size, Vector2 position);
+	ShipMask(Ship::Alignment alignment, int size, Vector2 position);
 	int size = 2;
 	Vector2 position = {};
 	Rectangle drawRec = {};

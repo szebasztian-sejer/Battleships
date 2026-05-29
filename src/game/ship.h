@@ -32,7 +32,7 @@ struct Ship
 	Ship(Alignment alignment, int size, Vector2 position);
 	bool isSunk(Board& board) const;
 	bool isValid(Board& board) const;
-	Rectangle Ship::getShipSource() const;
+	Rectangle getShipSource() const;
 	bool checkAndSink(Board& board, Board* oppBoard = nullptr);
 
 	void printShip()

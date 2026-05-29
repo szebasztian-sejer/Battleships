@@ -8,6 +8,7 @@
 #include <ui.h>
 #include <gamePlay.h>
 #include <difficulty.h>
+#include <raylib.h>
 
 UIEngine mainMenuUI;
 GamePlay gamePlay;
@@ -18,12 +19,14 @@ bool inGame = false;
 
 bool initGame()
 {
+	HideCursor();
 	assetManager.loadAll();
 	inGame = false;
 	return true;
 }
 bool updateGame()
 {
+	Vector2 mouse = GetMousePosition();
 	ClearBackground({ 0, 0, 0, 255 });
 	if (!inGame)
 	{
@@ -82,12 +85,27 @@ bool updateGame()
 		}
 
 		mainMenuUI.updateAndRender();
+		DrawTexturePro(
+			assetManager.cursor,
+			{ 0,0,(float)assetManager.cursor.width, (float)assetManager.cursor.height },
+			{ mouse.x, mouse.y, (float)assetManager.cursor.width, (float)assetManager.cursor.height },
+			{ assetManager.cursor.width / 2.0f, assetManager.cursor.height / 2.0f },
+			0.0f,
+			WHITE);
 
 		return true;
 	}
 	else
 	{
-		return gamePlay.update(assetManager);
+		bool ret = gamePlay.update(assetManager);
+		DrawTexturePro(
+			assetManager.cursor,
+			{ 0,0,(float)assetManager.cursor.width, (float)assetManager.cursor.height },
+			{ mouse.x, mouse.y, (float)assetManager.cursor.width, (float)assetManager.cursor.height },
+			{ assetManager.cursor.width / 2.0f, assetManager.cursor.height / 2.0f },
+			0.0f,
+			WHITE);
+		return ret;
 	}
 }
 bool closeGame()
