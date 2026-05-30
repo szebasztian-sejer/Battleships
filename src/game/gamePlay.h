@@ -4,6 +4,7 @@
 #include <ai.h>
 #include <difficulty.h>
 #include <graphics.h>
+#include <soundEngine.h>
 #include <shipMask.h>
 #include <memory>
 #include <unordered_set>
@@ -32,6 +33,7 @@ struct GamePlay
 	std::unique_ptr<ShipMask> shipMask;
 
 	Graphics graphics;
+	SoundEngine soundEngine;
 
 	bool init(Difficulty d);
 	bool update(AssetManager& assetManager);

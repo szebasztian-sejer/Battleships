@@ -129,17 +129,23 @@ bool GamePlay::update(AssetManager& assetManager)
 					{
 						if (checkHit(ai.board, selectedCell))
 						{
+							soundEngine.playHitSound(assetManager);
 							ai.board.setSquare(selectedCell, Board::SquareState::HIT);
 							human.shots[pos] = Board::SquareState::HIT;
-							updateShips(&ai);
+							if (updateShips(&ai))
+							{
+								soundEngine.playSinkSound(assetManager);
+							}
 						}
 						else
 						{
+							soundEngine.playMissSound(assetManager);
 							ai.board.setSquare(selectedCell, Board::SquareState::MISSED);
 							human.shots[pos] = Board::SquareState::MISSED;
 						}
 						if (ai.isLost())
 						{
+							soundEngine.playVictorySound(assetManager);
 							state = State::HUMAN_WIN;
 						}
 						else
@@ -171,11 +177,13 @@ bool GamePlay::update(AssetManager& assetManager)
 			int pos = (int)target.y * human.board.w + (int)target.x;
 			if (checkHit(human.board, target))
 			{
+				soundEngine.playHitSound(assetManager);
 				human.board.setSquare(target, Board::SquareState::HIT);
 				ai.playerBoard.setSquare(target, Board::SquareState::HIT);
 				ai.shots[pos] = Board::SquareState::HIT;
 				if (updateShips(&human, &(ai.playerBoard)))
 				{
+					soundEngine.playSinkSound(assetManager);
 					ai.currentTargets.clear();
 					
 					int cruisersSunk = 0;
@@ -215,12 +223,14 @@ bool GamePlay::update(AssetManager& assetManager)
 			}
 			else
 			{
+				soundEngine.playMissSound(assetManager);
 				human.board.setSquare(target, Board::SquareState::MISSED);
 				ai.playerBoard.setSquare(target, Board::SquareState::MISSED);
 				ai.shots[pos] = Board::SquareState::MISSED;
 			}
 			if (human.isLost())
 			{
+				soundEngine.playDefeatSound(assetManager);
 				state = State::AI_WIN;
 			}
 			else

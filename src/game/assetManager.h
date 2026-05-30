@@ -9,5 +9,11 @@ struct AssetManager
 	Texture2D select = {};
 	Texture2D miss = {};
 	Texture2D cursor = {};
+
+	Sound victoryFx = {};
+	Sound defeatFx = {};
+	Sound missFx = {};
+	Sound hitFx = {};
+	Sound sinkFx = {};
 	void loadAll();
 };
