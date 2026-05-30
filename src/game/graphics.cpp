@@ -243,6 +243,18 @@ void Graphics::drawBottomRec()
 }
 void Graphics::drawPlacementsUi(AssetManager& assetManager, ShipMask* shipMask, Board& board)
 {
+	float pulse = 0.5f + 0.5f * sinf(GetTime() * 5.0f);
+
+	unsigned char brightness = (unsigned char)(190 + pulse * 65);
+	unsigned char alpha = (unsigned char)(160 + pulse * 95);
+
+	Color tint = 
+	{
+		brightness,
+		brightness,
+		brightness,
+		alpha
+	};
 	std::string helpText1 = "Left click to select and place ships. Right click to rotate.\n";
 	std::string helpText2 = "Backspace to cancel selection.";
 	int textSize1 = MeasureText(helpText1.c_str(), 24);
@@ -294,7 +306,7 @@ void Graphics::drawPlacementsUi(AssetManager& assetManager, ShipMask* shipMask, 
 			dest,
 			{ 0,0 },
 			rotation,
-			WHITE
+			tint
 		);
 
 	}
