@@ -22,7 +22,7 @@ bool Graphics::init()
 			off += (ships[i - 1] + 1) * xOffSet;
 		}
 		s.dstRec.x = bottomRec.x + off;
-		s.dstRec.y = bottomRec.y + 64;
+		s.dstRec.y = bottomRec.y + 96;
 		s.dstRec.width = ships[i] * 32;
 		s.dstRec.height = 32;
 		shipPlaces.push_back(s);
@@ -31,6 +31,19 @@ bool Graphics::init()
 
 	}
 	quitButton = { bottomRec.x + bottomRec.width - 100, bottomRec.y+bottomRec.height - 64, 80, 50 };
+	gameOverScreen = { GetScreenWidth() * 0.2f, GetScreenHeight() * 0.2f, GetScreenWidth() * 0.6f, GetScreenHeight() * 0.3f };
+	
+
+	gameOverQuit.width = quitTextSize * 2;
+	gameOverQuit.height = 24 * 1.5f;
+	gameOverRestart.width = restartTextSize * 2;
+	gameOverRestart.height = 24 * 1.5f;
+
+	gameOverQuit.x = gameOverScreen.x + (gameOverScreen.width / 2 - gameOverQuit.width) / 2;
+	gameOverRestart.x = (gameOverScreen.x + gameOverScreen.width/2) + (gameOverScreen.width / 2 - gameOverRestart.width) / 2;
+	gameOverQuit.y = gameOverScreen.y + gameOverScreen.height - gameOverQuit.height * 2;
+	gameOverRestart.y = gameOverScreen.y + gameOverScreen.height - gameOverRestart.height * 2;
+
 	return true;
 }
 
@@ -198,6 +211,24 @@ void Graphics::drawGrid(float boardX, float boardY)
 	}
 }
 
+void Graphics::drawCoords(float boardX, float boardY)
+{
+	for (int x = 0; x < 10; x++)
+	{
+		std::string letter;
+		letter += 'A' + x;
+		auto textsize = MeasureText(letter.c_str(), 32);
+		float textX = (boardX + x * 32 + boardX + x * 32 + textsize) / 2.0f;
+		DrawText(letter.c_str(), textX, boardY + 11 * 32, 32, BLACK);
+	}
+	for (int y = 1; y <= 10; y++)
+	{
+		std::string number;
+		number += std::to_string(y);
+		DrawText(number.c_str(), boardX - 32, boardY + (y - 1) * 32, 32, BLACK);
+	}
+}
+
 void Graphics::drawBottomRec()
 {
 	Color c = { 10,10,10, 255 };
@@ -212,6 +243,15 @@ void Graphics::drawBottomRec()
 }
 void Graphics::drawPlacementsUi(AssetManager& assetManager, ShipMask* shipMask, Board& board)
 {
+	std::string helpText1 = "Left click to select and place ships. Right click to rotate.\n";
+	std::string helpText2 = "Backspace to cancel selection.";
+	int textSize1 = MeasureText(helpText1.c_str(), 24);
+	int textSize2 = MeasureText(helpText2.c_str(), 24);
+
+	int text1X = (bottomRec.x + bottomRec.width - textSize1) / 2;
+	int text2X = (bottomRec.x + bottomRec.width - textSize2) / 2;
+	DrawText(helpText1.c_str(), text1X, bottomRec.y + 24, 24, WHITE);
+	DrawText(helpText2.c_str(), text2X, bottomRec.y + 48, 24, WHITE);
 	
 	for (int i = 0; i < shipPlaces.size(); i++)
 	{
@@ -257,10 +297,6 @@ void Graphics::drawPlacementsUi(AssetManager& assetManager, ShipMask* shipMask, 
 			WHITE
 		);
 
-	}
-	else
-	{
-		//std::cout << "ShipMask destroyed\n";
 	}
 }
 
@@ -326,5 +362,57 @@ bool Graphics::drawQuitButton(Vector2 mouse)
 		}
 	}
 	return false;
+}
+
+Rectangle* Graphics::drawGameOver(bool humanWon)
+{
+	std::string gameOver = "Game Over!";
+	std::string winner = humanWon ? "Player won!" : "AI won!";
+
+	int gameOverTextSize = MeasureText(gameOver.c_str(), 48);
+	int gameOverTextX = gameOverScreen.x + (gameOverScreen.width - gameOverTextSize) / 2;
+	int gameOverTextY = floor(gameOverScreen.y + 48 * 1.35f);
+	int winnerTextSize = MeasureText(winner.c_str(), 36);
+	int winnerTextX = gameOverScreen.x + (gameOverScreen.width - winnerTextSize) / 2;
+	int winnerTextY = floor(gameOverTextY + 36 * 1.25f);
+
+	DrawRectangle(gameOverScreen.x, gameOverScreen.y, gameOverScreen.width, gameOverScreen.height, { 40, 40, 40, 100 });
+	DrawText(gameOver.c_str(), gameOverTextX, gameOverTextY, 48, WHITE);
+	DrawText(winner.c_str(), winnerTextX, winnerTextY, 36, WHITE);
+	DrawRectangle(gameOverQuit.x, gameOverQuit.y, gameOverQuit.width, gameOverQuit.height, { 135, 135, 135, 180 });
+	DrawRectangle(gameOverRestart.x, gameOverRestart.y, gameOverRestart.width, gameOverRestart.height, { 135, 135, 135, 180 });
+	int gameOverQuitButtonX = gameOverQuit.x + (gameOverQuit.width - quitTextSize) / 2;
+	int gameOverQuitButtonY = gameOverQuit.y + (gameOverQuit.height - 32) / 2;
+	int gameOverRestartButtonX = gameOverRestart.x + (gameOverRestart.width - restartTextSize) / 2;
+	int gameOverRestartButtonY = gameOverRestart.y + (gameOverRestart.height - 32) / 2;
+	DrawText(quitText.c_str(), gameOverQuitButtonX, gameOverQuitButtonY, 32, WHITE);
+	DrawText(restartText.c_str(), gameOverRestartButtonX, gameOverRestartButtonY, 32, WHITE);
+
+	if (CheckCollisionPointRec(getMouse(), gameOverQuit))
+	{
+		DrawRectangle(gameOverQuit.x - 4, gameOverQuit.y - 4, 4, gameOverQuit.height + 8, RED);
+		DrawRectangle(gameOverQuit.x, gameOverQuit.y - 4, gameOverQuit.width, 4, RED);
+		DrawRectangle(gameOverQuit.x + gameOverQuit.width, gameOverQuit.y - 4, 4, gameOverQuit.height + 8, RED);
+		DrawRectangle(gameOverQuit.x - 4, gameOverQuit.y + gameOverQuit.height, gameOverQuit.width + 8, 4, RED);
+		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+		{
+			return &gameOverQuit;
+		}
+	}
+	if (CheckCollisionPointRec(getMouse(), gameOverRestart))
+	{
+		DrawRectangle(gameOverRestart.x - 4, gameOverRestart.y - 4, 4, gameOverRestart.height + 8, RED);
+		DrawRectangle(gameOverRestart.x, gameOverRestart.y - 4, gameOverRestart.width, 4, RED);
+		DrawRectangle(gameOverRestart.x + gameOverRestart.width, gameOverRestart.y - 4, 4, gameOverRestart.height + 8, RED);
+		DrawRectangle(gameOverRestart.x - 4, gameOverRestart.y + gameOverRestart.height, gameOverRestart.width + 8, 4, RED);
+		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+		{
+			return &gameOverRestart;
+		}
+	}
+
+
+	return nullptr;
+
 }
 

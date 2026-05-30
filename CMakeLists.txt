@@ -18,9 +18,6 @@ elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64|i.86")
 endif()
 
 
-
-
-
 project(battleships)
 
 if(ANDROID)

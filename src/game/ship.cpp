@@ -1,11 +1,9 @@
 #include <ship.h>
 #include <board.h>
-#include <iostream>
 
 Ship::Ship(Alignment alignment, int size, Vector2 position)
 {
 	id = shipID;
-	std::cout << "New ship created with ID: " << id << "\n";
 	shipID++;
 	this->alignment = alignment;
 	this->size = size;

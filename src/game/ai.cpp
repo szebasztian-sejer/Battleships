@@ -14,6 +14,24 @@ AI::AI()
 	{
 		remaining[i] = i;
 	}
+
+	
+
+	for (int i = 0; i < positionVectors.size(); i++)
+	{
+		for (int y = 0; y < 10; y++)
+		{
+			int offSet = y % (i + 2);
+			for (int x = 0; x < 10; x++)
+			{
+				if ((x + offSet) % (i + 2) == 0)
+				{
+					positionVectors[i].push_back(Vector2{(float)x,(float)y });
+				}
+			}
+		}
+	}
+		
 }
 
 void AI::setBoard()
@@ -65,13 +83,41 @@ Vector2 AI::easyAiTarget()
 	}
 }
 
-Vector2 AI::seek()
+Vector2 AI::seek(bool rnd)
 {
-	return easyAiTarget();
+	if (rnd)
+	{
+		return easyAiTarget();
+	}
+
+	if (remainingShips.empty())
+	{
+		return easyAiTarget();
+	}
+
+	int smallest = *std::min_element(remainingShips.begin(), remainingShips.end());
+	auto& currentPositionVector = positionVectors[smallest - 2];
+	
+	int target = getRandomInt(0, currentPositionVector.size() - 1);
+	auto result = currentPositionVector[target];
+	for (auto& posVec : positionVectors)
+	{
+		for (int i = 0; i < posVec.size(); i++)
+		{
+			auto pos = posVec[i];
+			if (pos.x == result.x && pos.y == result.y)
+			{
+				posVec[i] = posVec.back();
+				posVec.pop_back();
+			}
+		}
+	}
+	return result;
+
 }
 Vector2 AI::destroy()
 {
-	if (remainingShips.empty()) { std::cout << "PLAYER SHIPS EMPTY ERROR!!\n";  return seek(); }
+	if (remainingShips.empty()) { return seek(); }
 	int intBoard[10][10] = {};
 	for (const auto& t : currentTargets)
 	{
@@ -152,12 +198,11 @@ Vector2 AI::destroy()
 		std::cout << "\n";
 	}
 
-	if (best.x == -1) { std::cout << "No good candidae found, defaulting to seeking\n";  return seek(); }
-	std::cout << "Shooting target: {" << best.x << "," << best.y << "} with score: " << max << "\n";
+	if (best.x == -1) { return seek(); }
 	return best;
 }
 
-Vector2 AI::mediumAiTarget()
+Vector2 AI::mediumHardAiTarget(bool rng)
 {
 	currentTargets.clear();
 	for (int y = 0; y < playerBoard.h; y++)
@@ -173,8 +218,7 @@ Vector2 AI::mediumAiTarget()
 	}
 	if (currentTargets.empty())
 	{
-		std::cout << "Current targets empty, seeking...\n";
-		return seek();
+		return seek(rng);
 	}
 	return destroy();
 }

@@ -2,11 +2,15 @@
 #include <ui.h>
 #include <ship.h>
 #include <assetManager.h>
-#include <iostream>
 
 bool GamePlay::init(Difficulty d)
 {
-	//human.setBoard();
+	human = Human();
+	ai = AI();
+
+	selectedShip = 0;
+	alreadySunk.clear();
+	shipMask = nullptr;
 	ai.setBoard();
 	
 	difficulty = d;
@@ -38,9 +42,10 @@ bool GamePlay::update(AssetManager& assetManager)
 
 	graphics.drawGrid(human.board.drawRec.x, human.board.drawRec.y);
 	graphics.drawGrid(ai.board.drawRec.x, ai.board.drawRec.y);
+	graphics.drawCoords(human.board.drawRec.x, human.board.drawRec.y);
+	graphics.drawCoords(ai.board.drawRec.x, ai.board.drawRec.y);
 	graphics.drawBottomRec();
 	
-
 
 	Vector2 mouseWorld = graphics.getMouse();
 	if (graphics.drawQuitButton(mouseWorld)) { return false; }
@@ -97,7 +102,6 @@ bool GamePlay::update(AssetManager& assetManager)
 					shipMask = nullptr;
 				}
 			}
-
 			graphics.drawPlacementsUi(assetManager, shipMask.get(), human.board);
 			break;
 		}
@@ -151,8 +155,19 @@ bool GamePlay::update(AssetManager& assetManager)
 		}
 		case State::AI_TURN:
 		{
-			Vector2 target = ai.mediumAiTarget();
-			std::cout << "Targetting: {" << target.y << "," << target.x << "}\n";
+			Vector2 target;
+			switch (difficulty)
+			{
+				case Difficulty::EASY:
+					target = ai.easyAiTarget();
+					break;
+				case Difficulty::MEDIUM:
+					target = ai.mediumHardAiTarget(true);
+					break;
+				case Difficulty::HARD:
+					target = ai.mediumHardAiTarget(false);
+					break;
+			}
 			int pos = (int)target.y * human.board.w + (int)target.x;
 			if (checkHit(human.board, target))
 			{
@@ -216,11 +231,32 @@ bool GamePlay::update(AssetManager& assetManager)
 		}
 		case State::AI_WIN:
 		{
-			return false;
+			Rectangle* restartOrQuit = graphics.drawGameOver(false);
+			if (!restartOrQuit) { return true; }
+			if (restartOrQuit->x == graphics.gameOverQuit.x)
+			{
+				return false;
+			}
+			if (restartOrQuit->x == graphics.gameOverRestart.x)
+			{
+				init(difficulty);
+			}
+			break;
+			
 		}
 		case State::HUMAN_WIN:
 		{
-			return false;
+			Rectangle* restartOrQuit = graphics.drawGameOver(true);
+			if (!restartOrQuit) { return true; }
+			if (restartOrQuit->x == graphics.gameOverQuit.x)
+			{
+				return false;
+			}
+			if (restartOrQuit->x == graphics.gameOverRestart.x)
+			{
+				init(difficulty);
+			}
+			break;
 		}
 
 	}
